@@ -7,6 +7,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
+#include "Components/DecalComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "WeaponComponent.h"
@@ -86,6 +87,11 @@ void ABasicPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAction(TEXT("Crouch"), IE_Pressed, this, &ABasicPlayer::StartCrouch);
 
 	PlayerInputComponent->BindAction(TEXT("Reload"), IE_Pressed, this, &ABasicPlayer::Reload);
+
+	PlayerInputComponent->BindAction(TEXT("LeftLean"), IE_Pressed, this, &ABasicPlayer::StartLeftLean);
+	PlayerInputComponent->BindAction(TEXT("LeftLean"), IE_Released, this, &ABasicPlayer::StopLeftLean);
+	PlayerInputComponent->BindAction(TEXT("RightLean"), IE_Pressed, this, &ABasicPlayer::StartRightLean);
+	PlayerInputComponent->BindAction(TEXT("RightLean"), IE_Released, this, &ABasicPlayer::StopRightLean);
 }
 
 void ABasicPlayer::MoveForward(float AxisValue)
@@ -214,11 +220,37 @@ void ABasicPlayer::OnFire()
 	//카메라에서 쏘는 이유는 UI의 조준선이 화면 기준으로 되어 있기 때문에 에임을 맞춘다는게 카메라에서 조준섬으로 라인을 쏘는걸로 한다.
 	//맞는다면 총에서 라인을 쏴서 진짜 맞았는지 확인
 	bool Result = UKismetSystemLibrary::LineTraceSingleForObjects(
-		GetWorld(), TraceStart, TraceEnd, Objects, true, ActorToIgnore, EDrawDebugTrace::ForDuration,
+		GetWorld(), TraceStart, TraceEnd, Objects, true, ActorToIgnore, EDrawDebugTrace::None,
 		OutHit, true, FLinearColor::Red, FLinearColor::Green, 5.0f);
 
 	//충돌한다면
 	if (Result) {
+		//HitEffect(Blood) and Decal
+		//피격했을때 이펙트효과
+		if (Cast<ACharacter>(OutHit.GetActor())) {
+			//캐릭터
+			//+ (OutHit.ImpactNormal * 10) : 피격 위치보다 조금 내쪽으로 당긴거다 이펙트가 더 잘보일려고
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodHitEffect, OutHit.ImpactPoint + (OutHit.ImpactNormal * 10));
+
+			//not use skeletalMesh
+			//UDecalComponent* NewDecal = UGameplayStatics::SpawnDecalAtLocation(
+			//	GetWorld(), NormalDecal, FVector(5, 5, 5), OutHit.ImpactPoint, OutHit.ImpactNormal.Rotation(), 10.0f);
+			////화면 사이즈 비율로 정해진다.
+			////0.005퍼센트보다 작아지면 안보임
+			//NewDecal->SetFadeScreenSize(0.005f);
+		}
+		else {
+			//비캐릭터
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, OutHit.ImpactPoint + (OutHit.ImpactNormal * 10));
+
+			UDecalComponent* NewDecal = UGameplayStatics::SpawnDecalAtLocation(
+				GetWorld(), NormalDecal, FVector(5, 5, 5), OutHit.ImpactPoint, OutHit.ImpactNormal.Rotation(), 10.0f);
+
+			//화면 사이즈 비율로 정해진다.
+			//0.005퍼센트보다 작아지면 안보임
+			NewDecal->SetFadeScreenSize(0.005f);
+		}
+
 		//그냥 데미지
 		////맞은놈, 데미지, 때린 플레이어 컨트롤러, 때린놈(사람이냐 총알이냐), 데미지타입
 		//UGameplayStatics::ApplyDamage(OutHit.GetActor(), 30.f, GetController(), this, UBulletDamageType::StaticClass());
@@ -284,6 +316,26 @@ void ABasicPlayer::Reload()
 			PlayAnimMontage(ReloadMontage);
 		}
 	}
+}
+
+void ABasicPlayer::StartLeftLean()
+{
+	bLeftLean = true;
+}
+
+void ABasicPlayer::StartRightLean()
+{
+	bRightLean = true;
+}
+
+void ABasicPlayer::StopLeftLean()
+{
+	bLeftLean = false;
+}
+
+void ABasicPlayer::StopRightLean()
+{
+	bRightLean = false;
 }
 
 //데미지 처리되는 모든 액터에 구현을 해야 됨

@@ -19,5 +19,24 @@ void UBasicAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		bIsFire = Pawn->bIsFire;
 		bIsIronsight = Pawn->bIsIronsight;
 		bIsSprint = Pawn->bIsSprint;
+
+		//q,e키 회전값 적용
+		bool bLeftLean = Pawn->bLeftLean;
+		bool bRightLean = Pawn->bRightLean;
+
+		float TargetLeanAngle;
+
+		if (bLeftLean && !bRightLean) {
+			TargetLeanAngle = -30.0f;
+		}
+		else if (bRightLean && !bLeftLean) {
+			TargetLeanAngle = 30.0f;
+		}
+		else if (bLeftLean && bRightLean) {
+			TargetLeanAngle = 0;
+		}
+		else TargetLeanAngle = 0;
+
+		CurrentLeanAngle = FMath::FInterpTo(CurrentLeanAngle, TargetLeanAngle, DeltaSeconds, 10.0f);
 	}
 }

@@ -56,6 +56,11 @@ public:
 
 	void Reload();
 
+	void StartLeftLean();
+	void StartRightLean();
+	void StopLeftLean();
+	void StopRightLean();
+
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 		float WalkSpeed = 300.0f;
 
@@ -68,14 +73,20 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Data")
 		float MaxHP = 100.0f;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Status")
 		uint64 bIsFire : 1;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Status")
 		uint64 bIsSprint : 1;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Status")
 		uint64 bIsIronsight : 1;
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Status")
+		uint8 bLeftLean : 1;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Status")
+		uint8 bRightLean : 1;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "SpringArm");
 		FVector NormalSpringArmPosition;
@@ -109,11 +120,12 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Data")
 		class UAnimMontage* HitReactMontage;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Data")
+		class UMaterialInstance* NormalDecal;
+
 	virtual float TakeDamage(float DamageAmount,
 		struct FDamageEvent const& DamageEvent,
 		class AController* EventInstigator,
 		AActor* DamageCauser) override;
-
-	
 
 };

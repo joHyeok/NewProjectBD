@@ -23,16 +23,18 @@ public:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Status")
 		float Direction;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Status")
+		float CurrentLeanAngle;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Status")
 		uint64 bIsFire : 1;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Status")
 		uint64 bIsSprint : 1;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Status")
 		uint64 bIsIronsight : 1;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Status")
 		uint64 bIsCrouch : 1;
-	
 };
